@@ -1,29 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FileText, Zap, BadgeCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Video Speed Reader — 上傳影片，三分鐘內拿到逐字稿" },
-      {
-        name: "description",
-        content:
-          "Upload your video, get a clean transcript in three minutes. High-accuracy transcripts for content creators, educators, and engineers.",
-      },
-      { property: "og:title", content: "Video Speed Reader" },
-      {
-        property: "og:description",
-        content:
-          "Upload your video, get a clean transcript in three minutes.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: LandingPage,
-});
 
 const features = [
   {
@@ -49,8 +27,12 @@ const features = [
   },
 ];
 
-function LandingPage() {
+export default function LandingPage() {
   const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    document.title = "Video Speed Reader — 上傳影片，三分鐘內拿到逐字稿";
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {

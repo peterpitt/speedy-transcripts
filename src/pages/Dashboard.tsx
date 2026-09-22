@@ -1,32 +1,23 @@
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  useRouteContext,
-} from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useProtectedUser } from "@/components/ProtectedRoute";
 
-export const Route = createFileRoute("/_authenticated/app")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — Video Speed Reader" },
-      { name: "description", content: "Your Video Speed Reader dashboard." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AppPage,
-});
-
-function AppPage() {
-  const { user } = Route.useRouteContext();
-  const { queryClient } = useRouteContext({ from: "__root__" });
+export default function DashboardPage() {
+  const user = useProtectedUser();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Dashboard — Video Speed Reader";
+  }, []);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate("/auth", { replace: true });
   }
 
   return (
@@ -47,12 +38,10 @@ function AppPage() {
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-20">
         <div className="animate-fade-up">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Hi {user.email}
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Hi {user.email}</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Your dashboard is coming soon. Upload functionality will be added
-            in the next milestone.
+            Your dashboard is coming soon. Upload functionality will be added in
+            the next milestone.
           </p>
         </div>
       </main>

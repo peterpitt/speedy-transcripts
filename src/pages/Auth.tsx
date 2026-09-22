@@ -1,35 +1,28 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Sign in — Video Speed Reader" },
-      {
-        name: "description",
-        content: "Sign in or create your Video Speed Reader account.",
-      },
-      { property: "og:title", content: "Sign in — Video Speed Reader" },
-      {
-        property: "og:description",
-        content: "Sign in or create your Video Speed Reader account.",
-      },
-      { property: "og:type", content: "website" },
-    ],
-  }),
-  component: AuthPage,
-});
 
 type Mode = "signin" | "signup";
 
-function AuthPage() {
+export default function AuthPage({
+  initialMode = "signin",
+}: {
+  initialMode?: Mode;
+}) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    document.title = "Sign in — Video Speed Reader";
+  }, []);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -50,7 +43,7 @@ function AuthPage() {
         });
         if (error) throw error;
       }
-      navigate({ to: "/app" });
+      navigate("/app");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
