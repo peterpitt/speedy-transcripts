@@ -18,7 +18,7 @@ The site must include:
 
    - Footer with copyright "© 2026 Video Speed Reader"
 
-2. Authentication using Lovable's built-in Supabase-style auth (use whatever auth backend Lovable provides by default — Lovable Cloud is fine for this v1; we'll swap to a user-owned Supabase project in a later step):
+2. Authentication using Supabase (email + password), backed by the project owner's own Supabase project:
 
    - Sign Up page with email + password
 
@@ -47,16 +47,6 @@ Design requirements:
 - Tasteful subtle animations (fade-in on scroll is fine; don't overdo it)
 
 Out of scope for this v1: video upload widget, transcript display, payment, custom database tables (do NOT create a `profiles` or `videos` table — only use Supabase's default `auth.users`). Those come in later milestones. Stick to landing page + auth + placeholder dashboard.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f2f4a113-c564-4e9b-96ee-98d88ec7cdb5).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
