@@ -6,7 +6,8 @@
 
 /*
  * Design system: Video Speed Reader
- * Near-black background, violet accent, Inter typeface.
+ * Vintage film palette — aged parchment on a dark warm olive ground,
+ * dusty terracotta accent with muted sage, classic serif type.
  */
 
 @theme inline {
@@ -45,36 +46,40 @@
 }
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    "Noto Sans TC", sans-serif;
+  --font-sans: "Spectral", "Noto Serif TC", ui-serif, Georgia, Cambria,
+    "Times New Roman", serif;
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.11 0.015 290);
-  --foreground: oklch(0.96 0.01 290);
-  --card: oklch(0.15 0.02 290);
-  --card-foreground: oklch(0.96 0.01 290);
-  --popover: oklch(0.15 0.02 290);
-  --popover-foreground: oklch(0.96 0.01 290);
-  --primary: oklch(0.62 0.24 295);
-  --primary-foreground: oklch(0.98 0.005 295);
-  --secondary: oklch(0.2 0.03 290);
-  --secondary-foreground: oklch(0.96 0.01 290);
-  --muted: oklch(0.2 0.03 290);
-  --muted-foreground: oklch(0.68 0.03 290);
-  --accent: oklch(0.24 0.05 295);
-  --accent-foreground: oklch(0.96 0.01 290);
-  --destructive: oklch(0.62 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 25);
-  --border: oklch(0.26 0.03 290);
-  --input: oklch(0.28 0.035 290);
-  --ring: oklch(0.62 0.24 295);
-  --chart-1: oklch(0.62 0.24 295);
-  --chart-2: oklch(0.7 0.18 200);
-  --chart-3: oklch(0.75 0.15 150);
-  --chart-4: oklch(0.78 0.18 80);
-  --chart-5: oklch(0.65 0.22 340);
+  --radius: 0.5rem;
+  /* Aged-film ground: dark, warm, desaturated olive-charcoal. */
+  --background: oklch(0.17 0.014 110);
+  --foreground: oklch(0.91 0.022 85);
+  --card: oklch(0.22 0.016 110);
+  --card-foreground: oklch(0.91 0.022 85);
+  --popover: oklch(0.21 0.016 110);
+  --popover-foreground: oklch(0.91 0.022 85);
+  /* Dusty terracotta / sun-faded clay — the warm earth note of the photo. */
+  --primary: oklch(0.6 0.088 48);
+  --primary-foreground: oklch(0.97 0.015 85);
+  /* Muted olive, echoing the linen robe + foliage. */
+  --secondary: oklch(0.27 0.022 125);
+  --secondary-foreground: oklch(0.91 0.022 85);
+  --muted: oklch(0.26 0.018 118);
+  --muted-foreground: oklch(0.69 0.026 95);
+  --accent: oklch(0.34 0.042 135);
+  --accent-foreground: oklch(0.93 0.02 85);
+  --destructive: oklch(0.55 0.13 30);
+  --destructive-foreground: oklch(0.97 0.012 85);
+  --border: oklch(0.3 0.02 112);
+  --input: oklch(0.32 0.022 112);
+  --ring: oklch(0.6 0.088 48);
+  /* Earthy chart ramp: terracotta, sage, ochre, muted teal, clay-brown. */
+  --chart-1: oklch(0.6 0.088 48);
+  --chart-2: oklch(0.58 0.055 140);
+  --chart-3: oklch(0.72 0.08 85);
+  --chart-4: oklch(0.6 0.05 200);
+  --chart-5: oklch(0.5 0.07 35);
 }
 
 @layer base {
@@ -87,6 +92,21 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Soft film vignette to echo the photograph's darkened edges.
+     Non-interactive overlay — never intercepts clicks or scrolls. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: radial-gradient(
+      ellipse 100% 100% at 50% 45%,
+      transparent 55%,
+      color-mix(in oklab, var(--background) 70%, black) 100%
+    );
   }
 }
 
@@ -118,11 +138,12 @@
   animation-delay: 450ms;
 }
 
-/* Soft violet glow behind hero content */
+/* Warm glow behind hero content (class name preserved for compatibility;
+   now a dusty-terracotta wash instead of violet). */
 @utility glow-violet {
   background: radial-gradient(
     ellipse 60% 50% at 50% 0%,
-    color-mix(in oklab, var(--primary) 22%, transparent),
+    color-mix(in oklab, var(--primary) 20%, transparent),
     transparent
   );
 }
