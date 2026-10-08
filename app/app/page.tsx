@@ -23,7 +23,15 @@ export default async function DashboardPage() {
           <Link href="/" className="text-base font-semibold tracking-tight">
             Video Speed Reader
           </Link>
-          <SignOutButton />
+          <div className="flex items-center gap-4">
+            <Link
+              href="/upload"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Upload
+            </Link>
+            <SignOutButton />
+          </div>
         </div>
       </header>
 
