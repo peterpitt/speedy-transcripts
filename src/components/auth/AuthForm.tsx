@@ -1,24 +1,24 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState, type FormEvent } from "react";
-import { supabase } from "@/integrations/supabase/client";
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type Mode = "signin" | "signup";
 
-export default function AuthPage({
+export default function AuthForm({
   initialMode = "signin",
 }: {
   initialMode?: Mode;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    document.title = "Sign in — Video Speed Reader";
-  }, []);
 
   useEffect(() => {
     setMode(initialMode);
@@ -43,7 +43,8 @@ export default function AuthPage({
         });
         if (error) throw error;
       }
-      navigate("/app");
+      router.push("/app");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -55,7 +56,7 @@ export default function AuthPage({
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border/60">
         <div className="mx-auto flex h-16 max-w-5xl items-center px-6">
-          <Link to="/" className="text-base font-semibold tracking-tight">
+          <Link href="/" className="text-base font-semibold tracking-tight">
             Video Speed Reader
           </Link>
         </div>

@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { FileText, Zap, BadgeCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 
 const features = [
   {
@@ -28,28 +30,25 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const supabase = useMemo(() => createClient(), []);
   const [signedIn, setSignedIn] = useState(false);
-
-  useEffect(() => {
-    document.title = "Video Speed Reader — 上傳影片，三分鐘內拿到逐字稿";
-  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSignedIn(Boolean(data.session));
     });
-  }, []);
+  }, [supabase]);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
-          <Link to="/" className="text-base font-semibold tracking-tight">
+          <Link href="/" className="text-base font-semibold tracking-tight">
             Video Speed Reader
           </Link>
           <Link
-            to={signedIn ? "/app" : "/auth"}
+            href={signedIn ? "/app" : "/auth"}
             className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             {signedIn ? "Open app" : "Sign in / 登入"}
@@ -71,7 +70,7 @@ export default function LandingPage() {
           </p>
           <div className="animate-fade-up animation-delay-450 mt-10">
             <Link
-              to={signedIn ? "/app" : "/auth"}
+              href={signedIn ? "/app" : "/auth"}
               className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
               Sign in / 登入
