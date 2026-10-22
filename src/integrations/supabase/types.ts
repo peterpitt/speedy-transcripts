@@ -10,10 +10,153 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
+      consultancy_firm_events: {
+        Row: {
+          action: string
+          actor: string | null
+          args: Json
+          created_at: string
+          firm_id: string
+          id: number
+          seq: number
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          args?: Json
+          created_at?: string
+          firm_id: string
+          id?: never
+          seq: number
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          args?: Json
+          created_at?: string
+          firm_id?: string
+          id?: never
+          seq?: number
+        }
+        Relationships: []
+      }
+      consultancy_proposals: {
+        Row: {
+          advisors: string[]
+          created_at: string
+          created_by: string | null
+          engine: string | null
+          id: string
+          idea: string
+          input: Json
+          mvp_text: string
+          result: Json | null
+          topics: string[]
+          updated_at: string
+        }
+        Insert: {
+          advisors?: string[]
+          created_at?: string
+          created_by?: string | null
+          engine?: string | null
+          id: string
+          idea: string
+          input?: Json
+          mvp_text?: string
+          result?: Json | null
+          topics?: string[]
+          updated_at?: string
+        }
+        Update: {
+          advisors?: string[]
+          created_at?: string
+          created_by?: string | null
+          engine?: string | null
+          id?: string
+          idea?: string
+          input?: Json
+          mvp_text?: string
+          result?: Json | null
+          topics?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      credit_products: {
+        Row: {
+          active: boolean
+          created_at: string
+          credits: number
+          id: string
+          name: string
+          price_usd: number
+          stripe_price_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          credits: number
+          id?: string
+          name: string
+          price_usd: number
+          stripe_price_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          credits?: number
+          id?: string
+          name?: string
+          price_usd?: number
+          stripe_price_id?: string | null
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          job_id: string | null
+          stripe_payment_intent_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_id?: string | null
+          stripe_payment_intent_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_id?: string | null
+          stripe_payment_intent_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_sessions: {
         Row: {
           created_at: string
@@ -89,6 +232,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          credits_balance: number
+          email: string | null
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          credits_balance?: number
+          email?: string | null
+          id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          credits_balance?: number
+          email?: string | null
+          id?: string
+          role?: string
+        }
+        Relationships: []
       }
     }
     Views: {

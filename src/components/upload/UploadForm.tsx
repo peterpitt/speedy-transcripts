@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -9,11 +10,13 @@ export default function UploadForm() {
   const [topic, setTopic] = useState("");
   const [language, setLanguage] = useState("zh");
   const [error, setError] = useState<string | null>(null);
+  const [insufficient, setInsufficient] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setInsufficient(false);
     setLoading(true);
     try {
       const res = await fetch("/api/jobs", {
@@ -27,6 +30,9 @@ export default function UploadForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 402) {
+          setInsufficient(true);
+        }
         throw new Error(data.error ?? `Request failed (${res.status})`);
       }
       setVideoUrl("");
@@ -99,9 +105,17 @@ export default function UploadForm() {
         </div>
 
         {error && (
-          <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error}
-          </p>
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <p>{error}</p>
+            {insufficient && (
+              <Link
+                href="/credits"
+                className="mt-1 inline-block font-semibold underline"
+              >
+                Buy credits →
+              </Link>
+            )}
+          </div>
         )}
 
         <button

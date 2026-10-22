@@ -125,18 +125,103 @@ def transcribe_chunk(chunk_path: Path, language: str) -> str:
         )
 
 
+# ----- M2 credits: duration metering + deduction -----
+
+def ceil_minutes(seconds: float) -> int:
+    """1 credit per minute, always rounded UP; <60s still costs 1 credit."""
+    return max(1, math.ceil(seconds / 60))
+
+
+def probe_duration_minutes_cheap(url: str):
+    """Probe duration WITHOUT downloading. Returns ceil(minutes), or None if the
+    source doesn't expose duration in its manifest (direct mp4s return 'NA')."""
+    if not url.startswith(("http://", "https://")):
+        return None
+    try:
+        out = subprocess.run(
+            ["yt-dlp", "--print", "duration", "--no-warnings", url],
+            check=True, capture_output=True, text=True, timeout=30,
+        ).stdout.strip()
+    except Exception:
+        return None
+    if not out or out.upper() == "NA":
+        return None
+    try:
+        return ceil_minutes(float(out))
+    except ValueError:
+        return None
+
+
+def get_balance(user_id: str) -> float:
+    row = (
+        db.table("profiles").select("credits_balance").eq("id", user_id)
+        .single().execute().data
+    )
+    return float(row["credits_balance"]) if row else 0.0
+
+
+def mark_insufficient(job_id: str, user_id: str, minutes: int, balance: float) -> None:
+    """Terminal state: not enough credits. No Whisper call, platform pays nothing."""
+    update_job(job_id, status="insufficient_credits")
+    db.table("credit_transactions").insert({
+        "user_id": user_id,
+        "amount": 0,
+        "type": "deduction",
+        "description": f"Insufficient credits: video is {minutes} min, you have {int(balance)}",
+        "job_id": job_id,
+    }).execute()
+
+
+def deduct_credits(user_id: str, minutes: int, job_id: str) -> None:
+    """Ledger row + balance decrement on successful completion."""
+    db.table("credit_transactions").insert({
+        "user_id": user_id,
+        "amount": -minutes,
+        "type": "deduction",
+        "description": f"Transcribed {minutes} min video",
+        "job_id": job_id,
+    }).execute()
+    row = (
+        db.table("profiles").select("credits_balance").eq("id", user_id)
+        .single().execute().data
+    )
+    new_balance = max(0.0, float(row["credits_balance"]) - minutes)
+    db.table("profiles").update({"credits_balance": new_balance}).eq("id", user_id).execute()
+
+
 def main() -> None:
     job_id = os.environ["JOB_ID"]
     job = get_job(job_id)
     session_id = job["current_session_id"]
+    user_id = job["user_id"]
 
+    # Claim the job FIRST — any crash below leaves it 'downloading', not 'pending',
+    # so the distributor won't re-spawn it into a respawn loop.
     update_job(job_id, status="downloading")
-    print(f"[{job_id}] downloading {job['video_source_url']}")
+    balance = get_balance(user_id)
+    print(f"[{job_id}] claimed; balance={balance}cr")
+
+    # Cheap pre-download duration probe (free for sources with a manifest).
+    minutes = probe_duration_minutes_cheap(job["video_source_url"])
+    if minutes is not None and minutes > balance:
+        mark_insufficient(job_id, user_id, minutes, balance)
+        print(f"[{job_id}] insufficient (cheap probe): {minutes}min > {balance}cr")
+        return
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
+        print(f"[{job_id}] downloading {job['video_source_url']}")
         video = download_video(job["video_source_url"], tmp_path)
         mp3 = to_mp3(video, tmp_path)
+
+        # Precise duration from the actual audio when the cheap probe couldn't
+        # read it (direct mp4s / 'NA'). Re-check the balance before any Whisper call.
+        if minutes is None:
+            minutes = ceil_minutes(get_duration_seconds(mp3))
+            if minutes > balance:
+                mark_insufficient(job_id, user_id, minutes, balance)
+                print(f"[{job_id}] insufficient (ffprobe): {minutes}min > {balance}cr")
+                return
 
         update_job(job_id, status="transcribe")
         chunks = split_chunks(mp3, tmp_path)
@@ -147,9 +232,11 @@ def main() -> None:
         )
 
         update_session(session_id, subtitle_txt_content=full_text)
+        # Deduct only on success; failed jobs cost the user nothing.
+        deduct_credits(user_id, minutes, job_id)
         update_job(job_id, status="done")
 
-    print(f"[{job_id}] done — {len(full_text)} chars")
+    print(f"[{job_id}] done — {len(full_text)} chars, deducted {minutes} credit(s)")
 
 
 if __name__ == "__main__":

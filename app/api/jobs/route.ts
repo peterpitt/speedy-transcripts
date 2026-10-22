@@ -24,6 +24,22 @@ export async function POST(req: Request) {
     );
   }
 
+  // 1b. Fast credit floor: block submission when balance < 1. The precise
+  //     per-video check (duration vs balance) happens on the worker, which is
+  //     the only place that knows the video length. This cheap pre-check just
+  //     gives instant feedback for the obvious "no credits at all" case.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("credits_balance")
+    .eq("id", user.id)
+    .single();
+  if (!profile || Number(profile.credits_balance) < 1) {
+    return NextResponse.json(
+      { error: "insufficient credits — please buy more at /credits" },
+      { status: 402 },
+    );
+  }
+
   // 2. Use the Supabase Secret key (bypasses RLS) to insert the job + session.
   const admin = createAdminClient();
 
