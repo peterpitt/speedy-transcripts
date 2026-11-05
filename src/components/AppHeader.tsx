@@ -2,8 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/auth/SignOutButton";
 
-// Shared app header with a live credits balance pill. Server component — reads
-// the signed-in user's balance on every server navigation.
+// Shared app header: primary nav + live credits balance pill. Server component —
+// reads the signed-in user's balance on every server navigation.
 export default async function AppHeader() {
   const supabase = await createClient();
   const {
@@ -26,17 +26,24 @@ export default async function AppHeader() {
         <Link href="/" className="text-base font-semibold tracking-tight">
           Video Speed Reader
         </Link>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/upload"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Upload
-          </Link>
-          {user && (
+
+        {user && (
+          <nav className="flex items-center gap-4">
+            <Link
+              href="/app"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/upload"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Transcriptions
+            </Link>
             <Link
               href="/credits"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-sm"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-sm transition-colors hover:border-foreground/30"
             >
               <span className="text-muted-foreground">Credits</span>
               <span className="font-semibold text-foreground">
@@ -44,9 +51,9 @@ export default async function AppHeader() {
               </span>
               <span className="text-primary">Buy more</span>
             </Link>
-          )}
-          {user && <SignOutButton />}
-        </div>
+            <SignOutButton />
+          </nav>
+        )}
       </div>
     </header>
   );

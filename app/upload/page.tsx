@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import SignOutButton from "@/components/auth/SignOutButton";
+import AppHeader from "@/components/AppHeader";
 import UploadForm from "@/components/upload/UploadForm";
 
 export const metadata: Metadata = { title: "Upload — Video Speed Reader" };
@@ -50,22 +49,7 @@ export default async function UploadPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border/60">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
-          <Link href="/" className="text-base font-semibold tracking-tight">
-            Video Speed Reader
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/app"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Dashboard
-            </Link>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
         {/* Jobs list */}
