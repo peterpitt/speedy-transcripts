@@ -1,16 +1,20 @@
 version: 0.2
 
 # Used in Cowork mode only: the bash sandbox can't reach S3 and the AWS MCP has a
-# separate filesystem, so CodeBuild acts as the courier — it downloads the Lambda
+# separate filesystem, so CodeBuild acts as the courier — it installs the Lambda
 # deps, zips the layer + handler, and uploads both to S3 for lambda publish/create.
 # Invoke with: codebuild start-build --buildspec-override lambda-build.buildspec.yml
 #   --environment-variables-override name=ARTIFACTS_BUCKET,value=<bucket>,type=PLAINTEXT
-# EVERY command is double-quoted: the pip flag --only-binary=:all: contains ": "
-# which YAML otherwise reads as a key/value separator (YAML_FILE_ERROR).
+# NOTE: use `pip install --target` (NOT `pip download --target`, which is invalid),
+# and pin python 3.12 so the compiled wheels (e.g. pydantic-core) match the Lambda
+# python3.12 runtime.
 phases:
+  install:
+    runtime-versions:
+      python: 3.12
   build:
     commands:
-      - "pip download --platform manylinux2014_x86_64 --only-binary=:all: --target python supabase boto3"
-      - "zip -r deps-layer.zip python"
-      - "aws s3 cp deps-layer.zip s3://${ARTIFACTS_BUCKET}/deps-layer.zip"
-      - "zip -j handler.zip worker/lambda_distributor.py && aws s3 cp handler.zip s3://${ARTIFACTS_BUCKET}/handler.zip"
+      - pip install --target python supabase boto3
+      - zip -r deps-layer.zip python
+      - aws s3 cp deps-layer.zip s3://${ARTIFACTS_BUCKET}/deps-layer.zip
+      - zip -j handler.zip worker/lambda_distributor.py && aws s3 cp handler.zip s3://${ARTIFACTS_BUCKET}/handler.zip
